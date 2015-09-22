@@ -28,10 +28,16 @@ class Glove(object):
         self.gradsqb         = np.ones_like(self.b, dtype=np.float64)
         self.gradsqContextB  = np.ones_like(self.ContextB, dtype=np.float64)
 
-    def train(self, step_size=0.05, workers = 9, batch_size=50):
+    def train(self, step_size=0.05, workers = 9, batch_size=50, verbose=False):
         jobs = Queue(maxsize=2 * workers)
         lock = threading.Lock()  # for shared state (=number of words trained so far, log reports...)
         total_error = [0.0]
+        total_done  = [0]
+
+        total_els = 0
+        for key in self.cooccurence:
+            for subkey in self.cooccurence[key]:
+                total_els += 1
 
         # Worker function:
         def worker_train():
@@ -43,6 +49,10 @@ class Glove(object):
                 train_glove(self, job, step_size, error)
                 with lock:
                     total_error[0] += error[0]
+                    total_done[0] += len(job[0])
+                    if verbose:
+                        if total_done[0] % 1000 == 0:
+                            print("Completed %.3f%%\r" % (100.0 * total_done[0] / total_els))
                 error[0] = 0.0
 
         # Create workers

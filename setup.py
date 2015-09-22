@@ -6,7 +6,7 @@ def readfile(fname):
 
 setup(
     name='glove',
-    version='1.0.0',
+    version='1.0.1',
     description='Python package for computing embeddings from co-occurence matrices',
     long_description=readfile('README.md'),
     ext_modules=[],
